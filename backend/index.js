@@ -3,6 +3,11 @@ const app = express();
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
+const cors = require('cors');
+
+app.use(cors({
+    origin: 'http://localhost:8080'
+}));
 
 // Import routes
 const apiAuth = require('./routes/auth');
