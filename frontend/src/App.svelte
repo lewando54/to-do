@@ -1,6 +1,6 @@
 <script>
 	let name = 'world';
-	const loggedIn = true;
+	let authToken = localStorage.getItem('authToken') ? localStorage.getItem('authToken') : '';
 
 	let loginModalVisible = false;
 	let registerModalVisible = false;
@@ -30,6 +30,10 @@
 		registerModalVisible = false;
 	}
 
+	const showError = (error) => {
+		console.log(error);
+	}
+
 	const login = (data) => {
 		console.log("login: ", JSON.stringify(data.detail));
 		fetch('http://localhost:4200/api/auth/login', {
@@ -39,15 +43,61 @@
 				'Content-Type': 'application/json'
 			}
 		})
-		.then(res => console.log(res.json()));
-		hideLoginModal();
+		.then(res => res.json())
+		.then(res => {
+			console.log("login: ", res);
+			if(res.ok) {
+				authToken = res.ok;
+				localStorage.setItem('authToken', authToken);
+				hideLoginModal();
+			}
+			else{
+				alert(res);
+			}
+		})
+	}
+
+	const register = (data) => {
+		console.log("register: ", JSON.stringify(data.detail));
+		fetch('http://localhost:4200/api/auth/register', {
+			method: 'POST',
+			body: JSON.stringify(data.detail),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		})
+		.then(res => res.json())
+		.then(res => {
+			console.log("register: ", res);
+			if(res.ok) {
+				authToken = res.ok;
+				localStorage.setItem('authToken', authToken);
+				hideRegisterModal();
+			}
+			else{
+				alert(res.error);
+			}
+		})
+	}
+
+	const logout = () => {
+		localStorage.removeItem('authToken');
+		authToken = '';
 	}
 </script>
 
-<Header on:showLoginModal={showLoginModal} on:showRegisterModal={showRegisterModal}/>
-<Main {loggedIn}/>
+<Header 
+	{authToken} 
+	on:showLoginModal={showLoginModal} 
+	on:showRegisterModal={showRegisterModal} 
+	on:logout={logout}
+/>
+<Main {authToken}/>
 {#if loginModalVisible}
-	<Login on:hide={hideLoginModal} on:login={(data) => { login(data) }}/>
+	<Login 
+		on:hide={hideLoginModal} 
+		on:login={(data) => { login(data) }}
+	/>
 {/if}
 {#if registerModalVisible}
 	<Register on:hide={hideRegisterModal}/>

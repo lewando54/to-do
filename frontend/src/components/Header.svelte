@@ -2,6 +2,8 @@
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
 
+    export let authToken = '';
+
     const showLoginModal = () => {
         dispatch('showLoginModal');
     }
@@ -9,14 +11,22 @@
     const showRegisterModal = () => {
         dispatch('showRegisterModal');
     }
+
+    const logout = () => {
+        dispatch('logout');
+    }
 </script>
 
 <header>
     <nav>
         <p class="app-title">To-do</p>
         <div>
-            <button class="secondary" on:click={showLoginModal}>Login</button>
-            <button class="primary" on:click={showRegisterModal}>Register</button>
+            {#if authToken == '' || authToken == undefined}
+                <button class="secondary" on:click={showLoginModal}>Login</button>
+                <button class="primary" on:click={showRegisterModal}>Register</button>
+            {:else}
+                <button class="primary" on:click={logout}>Logout</button>
+            {/if}
         </div>
     </nav>
 </header>
@@ -29,7 +39,7 @@
         padding: 0 1rem;
         height: 60px;
         background: #fff;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 10px #0000004d;
     }
 
     .app-title{

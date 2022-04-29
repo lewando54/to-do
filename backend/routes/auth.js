@@ -20,7 +20,8 @@ router.post('/register', async (req, res) => {
         password: hashedPassword });
     try{
         const savedUser = await user.save();
-        res.json({"ok": savedUser});
+        const token = jwt.sign({_id: savedUser._id}, process.env.TOKEN_SECRET);
+        res.header('x-auth-token', token).json({"ok": token});
     }
     catch(err){
         res.status(400).json(err);

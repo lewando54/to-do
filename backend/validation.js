@@ -27,5 +27,16 @@ const loginValidation = (data) => {
     return schema.validate(data);
 };
 
+const taskValidation = (data) => {
+    const schema = Joi.object({
+        title: Joi.string()
+            .required(),
+        description: Joi.string()
+    })
+
+    return schema.validate(data);
+}
+
 module.exports.registerValidation = registerValidation;
 module.exports.loginValidation = loginValidation;
+module.exports.taskValidation = taskValidation;
