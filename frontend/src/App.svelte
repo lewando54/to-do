@@ -4,11 +4,15 @@
 
 	let loginModalVisible = false;
 	let registerModalVisible = false;
+	let alertVisible = false;
+	let alertMessage = 'Test';
+	let alertType = 'success';
 
 	import Header from './components/Header.svelte';
 	import Main from './components/Main.svelte';
 	import Login from './components/auth/Login.svelte';
 	import Register from './components/auth/Register.svelte';
+	import Alert from './components/Alert.svelte';
 
 	const showLoginModal = () => {
 		console.log("login modal: open");
@@ -30,8 +34,14 @@
 		registerModalVisible = false;
 	}
 
-	const showError = (error) => {
-		console.log(error);
+	const alert = (msg, type) => {
+		alertVisible = true;
+		alertMessage = msg;
+		alertType = type;
+	}
+
+	const hideAlertModal = () => {
+		alertVisible = false;
 	}
 
 	const login = (data) => {
@@ -49,10 +59,11 @@
 			if(res.ok) {
 				authToken = res.ok;
 				localStorage.setItem('authToken', authToken);
+				alert('Login successful', 'success');
 				hideLoginModal();
 			}
 			else{
-				alert(res);
+				alert(res, 'error');
 			}
 		})
 	}
@@ -72,10 +83,11 @@
 			if(res.ok) {
 				authToken = res.ok;
 				localStorage.setItem('authToken', authToken);
+				alert('User registered successfully', 'success');
 				hideRegisterModal();
 			}
 			else{
-				alert(res.error);
+				alert(res.error, 'error');
 			}
 		})
 	}
@@ -83,6 +95,7 @@
 	const logout = () => {
 		localStorage.removeItem('authToken');
 		authToken = '';
+		alert('Logged out successfully', 'success');
 	}
 </script>
 
@@ -101,6 +114,11 @@
 {/if}
 {#if registerModalVisible}
 	<Register on:hide={hideRegisterModal}/>
+{/if}
+{#if alertVisible}
+	<Alert {alertType} on:hide={hideAlertModal}>
+		{alertMessage}
+	</Alert>
 {/if}
 
 <style>

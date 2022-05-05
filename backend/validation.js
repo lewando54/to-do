@@ -32,6 +32,7 @@ const taskValidation = (data) => {
         title: Joi.string()
             .required(),
         description: Joi.string()
+            .max(240)
     })
 
     return schema.validate(data);
