@@ -62,7 +62,7 @@ router.post('/tasks', async (req, res) => {
 //Delete the task for the logged user
 router.delete('/tasks/:taskid', async (req, res) => {
     try{
-        const task = await Task.findOneAndDelete({_id: req.body.taskid});
+        const task = await Task.findOneAndDelete({_id: req.params.taskid});
         res.json({"ok": task});
     }
     catch(err){

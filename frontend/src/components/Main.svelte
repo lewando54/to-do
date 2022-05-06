@@ -8,7 +8,7 @@
         <h1>A simple Todo App</h1>
         <p>Made by <a href="https://github.com/lewando54" target="_blank">lewando54</a></p>
     {:else}
-        <Todo />
+        <Todo on:task-added on:task-deleted/>
     {/if}
 </main>
 

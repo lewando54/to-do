@@ -8,6 +8,9 @@
     import { quintOut } from 'svelte/easing';
     import { flip } from 'svelte/animate';
 
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
+
 	const [send, receive] = crossfade({
 		duration: d => Math.sqrt(d * 200),
 
@@ -37,13 +40,44 @@
         .then(res => res.json())
         .then(res => {
             $tasksStore = res.ok;
-            console.log("fetchAllTasksForUser: ", $tasksStore);
         })
     }
 
     onMount(() => {
         fetchAllTasksForUser();
     });
+
+    const deleteAPI = (task) => {
+        fetch(`http://localhost:4200/api/v1/tasks/${task._id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': `${localStorage.getItem('authToken')}`
+            }
+        })
+        remove(task);
+        dispatch('task-deleted');
+    }
+
+    const updateAPI = (task) => {
+        fetch(`http://localhost:4200/api/v1/tasks/${task._id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': `${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify({
+                title: task.title,
+                description: task.description,
+                done: task.done
+            })
+        })
+    }
+
+    const addTask = () => {
+        fetchAllTasksForUser();
+        dispatch('task-added');
+    }
 
     const remove = (task) => {
         $tasksStore = $tasksStore.filter(t => t._id !== task._id);
@@ -53,39 +87,49 @@
         task.done = done;
         remove(task);
         $tasksStore = $tasksStore.concat(task);
+        updateAPI(task);
     }
 </script>
 
 <h1>What needs to be done?</h1>
-<TaskForm />
-<h2>Tasks</h2>
+<TaskForm on:task-added={addTask}/>
+<h2>Your Tasks</h2>
 <div>
     <ul>
+        <li>
+            <h3>Todo</h3>
+        </li>
         {#each $tasksStore.filter(t => !t.done) as task (task._id)}
         <li
             in:receive="{{key: task._id}}"
             out:send="{{key: task._id}}"
-            animate:flip="{{duration: 200}}">
+            animate:flip="{{duration: 200}}"
+            class="task">
             <input type="checkbox" on:change={() => {mark(task, true)}}>
             <div class="task-data">
                 <p class="task-title">{task.title}</p>
                 <p class="task-description">{task.description}</p>
             </div>
+            <button on:click={() => {deleteAPI(task)}}>Delete</button>
         </li>
     {/each}
     </ul>
     <ul>
+        <li>
+            <h3>Done</h3>
+        </li>
         {#each $tasksStore.filter(t => t.done) as task (task._id)}
             <li 
                 in:receive="{{key: task._id}}"
                 out:send="{{key: task._id}}"
                 animate:flip="{{duration: 200}}"
-                class="task-done">
+                class="task task-done">
                 <input type="checkbox" checked on:change={() => {mark(task, false)}}>
                 <div class="task-data">
                     <p class="task-title">{task.title}</p>
                     <p class="task-description">{task.description}</p>
                 </div>
+                <button on:click={() => {deleteAPI(task)}}>Delete</button>
             </li>
         {/each}
     </ul>
@@ -101,12 +145,12 @@
     ul{
         display: flex;
         flex-direction: column;
+        list-style: none;
         gap: 0.5rem;
         width: 50%;
         padding-left: 0;
     }
-    li{
-        list-style: none;
+    li.task{
         display: flex;
         align-items: center;
         background-color: #f5f5f5;

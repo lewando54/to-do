@@ -4,6 +4,30 @@
     
     import { fly } from 'svelte/transition';
     import { quintOut } from 'svelte/easing';
+
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
+
+    let title = '';
+    let description = '';
+    $: task = {
+        title,
+        description
+    }
+
+    const addTask = () => {
+        fetch('http://localhost:4200/api/v1/tasks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': `${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify(task)
+        })
+        .then(() => {
+            dispatch('task-added', task);
+        })
+    }
 </script>
 <div class="container">
     <button class={buttonClass} on:click={() => {
@@ -17,14 +41,14 @@
         </svg>
     </button>
     {#if displayForm}
-    <form transition:fly={{ duration: 400, y: 200, opacity: 0, easing: quintOut}}>
+    <form on:submit|preventDefault={addTask} transition:fly={{ duration: 400, y: 200, opacity: 0, easing: quintOut}}>
         <div class="modal-input">
             <label for="task-title">Title</label>
-            <input required id="task-title" type="text" placeholder="e.g. Take the dog for a walk" />
+            <input required id="task-title" type="text" bind:value={title} placeholder="e.g. Take the dog for a walk" />
         </div>
         <div class="modal-input">
             <label for="task-title">Description</label>
-            <textarea required placeholder="e.g. Walk minimum 3km on the standard route. Remember to bring some water!!!"></textarea>
+            <textarea bind:value={description} required placeholder="e.g. Walk minimum 3km on the standard route. Remember to bring some water!!!"></textarea>
         </div>
         <button type="submit" class="primary">Add task</button>
     </form>
@@ -35,12 +59,6 @@
 <style>
     div.container{
         width: 100%;
-    }
-
-    @media screen and (min-width: 768px) {
-        div.container{
-            width: 40%;
-        }
     }
     
     .circle{
@@ -75,6 +93,9 @@
     }
 
     form{
+        position: fixed;
+        top: 13rem;
+        left: 28.5rem;
         background-color: #f4f4f4;
         width: 100%;
         display: flex;
@@ -82,6 +103,7 @@
         border-radius: 5px;
         border: 1px solid #c3c3c3;
         padding: 1rem;
+        z-index: 9999;
     }
 
     form textarea{
@@ -93,5 +115,15 @@
         max-height: 10rem;
         min-height: 3rem;
         border-radius: 5px;
+    }
+
+    @media screen and (min-width: 768px) {
+        div.container{
+            width: 40%;
+        }
+
+        form{
+            width: 40%;
+        }
     }
 </style>

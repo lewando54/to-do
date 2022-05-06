@@ -105,7 +105,9 @@
 	on:showRegisterModal={showRegisterModal} 
 	on:logout={logout}
 />
-<Main {authToken}/>
+<Main {authToken} 
+	on:task-added={() => {alert('Task added successfully', 'success');}}
+	on:task-deleted={() => {alert('Task deleted successfully', 'success');}}/>
 {#if loginModalVisible}
 	<Login 
 		on:hide={hideLoginModal} 
